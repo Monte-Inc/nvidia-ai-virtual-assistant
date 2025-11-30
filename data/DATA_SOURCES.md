@@ -4,37 +4,32 @@ This document describes all data sources in the AI Virtual Assistant blueprint, 
 
 ## Architecture Overview
 
-```
-+----------------------------------+----------------------------------------+
-|        STRUCTURED DATA           |          UNSTRUCTURED DATA             |
-+----------------------------------+----------------------------------------+
-|                                  |                                        |
-|  gear-store.csv                  |  manuals_pdf/*.pdf                     |
-|  orders.csv                      |  product/*.txt                         |
-|                                  |  FAQ.pdf                               |
-|         |                        |              |                         |
-|         v                        |              v                         |
-|  +--------------+                |  +---------------------------+         |
-|  |  PostgreSQL  |                |  |   Milvus Vector DB        |         |
-|  | (customer_   |                |  |   (NeMo Embeddings)       |         |
-|  |    data)     |                |  +---------------------------+         |
-|  +--------------+                |              |                         |
-|         |                        |              |                         |
-+---------|------------------------+--------------|-------------------------+
-          |                                       |
-          v                                       v
-   +------------------+                +---------------------+
-   | Structured       |                | Unstructured        |
-   | Retriever        |                | Retriever           |
-   +------------------+                +---------------------+
-          |                                       |
-          +-------------------+-------------------+
-                              |
-                              v
-                    +-------------------+
-                    |     AI Agent      |
-                    |    (LangGraph)    |
-                    +-------------------+
+```mermaid
+flowchart TB
+    subgraph structured["STRUCTURED DATA"]
+        csv1[gear-store.csv]
+        csv2[orders.csv]
+        postgres[(PostgreSQL<br/>customer_data)]
+    end
+
+    subgraph unstructured["UNSTRUCTURED DATA"]
+        pdf[manuals_pdf/*.pdf]
+        txt[product/*.txt]
+        faq[FAQ.pdf]
+        milvus[(Milvus Vector DB<br/>NeMo Embeddings)]
+    end
+
+    csv1 --> postgres
+    csv2 --> postgres
+    pdf --> milvus
+    txt --> milvus
+    faq --> milvus
+
+    postgres --> sr[Structured Retriever]
+    milvus --> ur[Unstructured Retriever]
+
+    sr --> agent[AI Agent<br/>LangGraph]
+    ur --> agent
 ```
 
 ---
