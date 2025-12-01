@@ -28,50 +28,31 @@ src/agent/
 
 ## Agent Graph
 
-```
-                         ┌─────────────────────┐
-                         │        START        │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │fetch_purchase_history│
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                    ┌───▶│  primary_assistant  │◀──────────────────┐
-                    │    └──────────┬──────────┘                   │
-                    │               │                              │
-                    │    ┌──────────┼──────────┬──────────┐        │
-                    │    │          │          │          │        │
-                    │    ▼          ▼          ▼          ▼        │
-                    │ ┌──────┐  ┌──────┐  ┌──────┐  ┌──────────┐   │
-                    │ │Order │  │Return│  │Product│ │other_talk│   │
-                    │ │Status│  │Proc. │  │  QA  │  └────┬─────┘   │
-                    │ └──┬───┘  └──┬───┘  └──┬───┘       │         │
-                    │    │         │         │           ▼         │
-                    │    ▼         ▼         ▼          END        │
-                    │ ┌──────┐  ┌──────┐  ┌──────┐                 │
-                    │ │Valid-│  │Valid-│  │ RAG  │                 │
-                    │ │ation │  │ation │  │Search│                 │
-                    │ └──┬───┘  └──┬───┘  └──┬───┘                 │
-                    │    │         │         │                     │
-                    │    ▼         ▼         ▼                     │
-                    │ ┌──────┐  ┌──────┐    END                    │
-                    │ │Tools │  │Tools │                           │
-                    │ └──┬───┘  └──┬───┘                           │
-                    │    │         │                               │
-                    │    │         ▼                               │
-                    │    │    ┌─────────┐                          │
-                    │    │    │Sensitive│ (interrupt_before)       │
-                    │    │    │ Tools   │                          │
-                    │    │    └────┬────┘                          │
-                    │    │         │                               │
-                    │    ▼         ▼                               │
-                    │   END       END                              │
-                    │                                              │
-                    └────────── (clarification needed) ────────────┘
+```mermaid
+flowchart TB
+    start([START]) --> fetch[fetch_purchase_history]
+    fetch --> primary[primary_assistant]
+
+    primary --> order[Order Status]
+    primary --> return[Return Processing]
+    primary --> product[Product QA]
+    primary --> other[Other Talk]
+
+    order --> order_valid{Validation}
+    return --> return_valid{Validation}
+    product --> rag[RAG Search]
+    other --> end1([END])
+
+    order_valid -->|needs clarification| primary
+    order_valid -->|valid| order_tools[Tools]
+    order_tools --> end2([END])
+
+    return_valid -->|needs clarification| primary
+    return_valid -->|valid| return_tools[Tools]
+    return_tools --> sensitive[Sensitive Tools]
+    sensitive -->|interrupt_before| end3([END])
+
+    rag --> end4([END])
 ```
 
 ---
