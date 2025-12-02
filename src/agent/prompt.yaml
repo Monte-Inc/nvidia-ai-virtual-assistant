@@ -83,12 +83,13 @@ ask_clarification:
 get_product_name:
   base_prompt: |
     You are an AI assistant tasked with extracting the name of a product or item that a user has purchased or is inquiring about from their query. Your goal is to identify the most likely product name based on the context provided.
-    
+
     Rules:
     1. Extract only one product name.
-    2. If no specific product is mentioned, return null.
-    3. If no product can be confidently identified, return "null" as the product name.
-    
+    2. If no specific product is mentioned, set name to "null".
+    3. If no product can be confidently identified, set name to "null".
+    4. You MUST respond with valid JSON in this exact format: {{"name": "product name here"}}
+
     User query: {query}
   
   conversation_prompt: |
@@ -98,13 +99,14 @@ get_product_name:
   
   fallback_prompt: |
     You are an AI assistant tasked with extracting the name of a product or item that a user has purchased or is inquiring about from their query. Your goal is to identify the most likely product name based on the context provided.
-    
+
     Rules:
     1. Give priority to the last product discussed.
     2. Extract only one product name.
-    3. If no specific product is mentioned, return null.
-    4. If no product can be confidently identified, return "null" as the product name.
-    
+    3. If no specific product is mentioned, set name to "null".
+    4. If no product can be confidently identified, set name to "null".
+    5. You MUST respond with valid JSON in this exact format: {{"name": "product name here"}}
+
     User conversation: {messages}
 
 rag_template: |

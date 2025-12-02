@@ -50,6 +50,10 @@ services:
       LOGLEVEL: ${LOGLEVEL:-INFO}
       # Set the default expiration time (TTL) for Redis keys (in seconds)
       REDIS_SESSION_EXPIRY: 12 # in hours
+      # LangSmith tracing
+      LANGCHAIN_TRACING_V2: ${LANGCHAIN_TRACING_V2:-false}
+      LANGCHAIN_API_KEY: ${LANGCHAIN_API_KEY:-}
+      LANGCHAIN_PROJECT: ${LANGCHAIN_PROJECT:-}
     ports:
     - "8081:8081"
     expose:
