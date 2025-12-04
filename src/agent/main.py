@@ -37,7 +37,7 @@ from src.common.utils import get_llm, get_prompts
 logger = logging.getLogger(__name__)
 prompts = get_prompts()
 # TODO get the default_kwargs from the Agent Server API
-default_llm_kwargs = {"temperature": 0.2, "top_p": 0.7, "max_tokens": 1024}
+default_llm_kwargs = {"temperature": 0.02, "top_p": 0.7, "max_tokens": 1024}
 
 # STATE OF THE AGENT
 class State(TypedDict):
@@ -56,6 +56,16 @@ def validate_product_info(state: State, config: RunnableConfig):
 
     # This dict is to populate the user_purchase_history and product details if required
     response_dict = {"needs_clarification": False}
+
+    # Extract the tool_call_id from the ProductValidation tool call to return a proper ToolMessage
+    tool_call_id = None
+    last_message = state["messages"][-1]
+    if hasattr(last_message, "tool_calls") and last_message.tool_calls:
+        for tc in last_message.tool_calls:
+            if tc["name"] == "ProductValidation":
+                tool_call_id = tc["id"]
+                break
+
     if state["user_id"]:
         # Update user purchase history based
         response_dict.update({"user_purchase_history": get_purchase_history(state["user_id"])})
@@ -73,13 +83,31 @@ def validate_product_info(state: State, config: RunnableConfig):
             if product_in_query:
                 reason = f"{product_in_query}"
             response_dict.update({"needs_clarification": True, "clarification_type": "no_product", "reason": reason})
+            # Return ToolMessage to satisfy the pending tool call
+            if tool_call_id:
+                response_dict["messages"] = [ToolMessage(
+                    content=f"Product validation failed: No matching product found for '{product_in_query}' in purchase history.",
+                    tool_call_id=tool_call_id,
+                )]
             return response_dict
         elif len(product_names) > 1:
             reason = ", ".join(product_names)
             response_dict.update({"needs_clarification": True, "clarification_type": "multiple_products", "reason": reason})
+            # Return ToolMessage to satisfy the pending tool call
+            if tool_call_id:
+                response_dict["messages"] = [ToolMessage(
+                    content=f"Product validation found multiple matches: {reason}. Please clarify which product.",
+                    tool_call_id=tool_call_id,
+                )]
             return response_dict
         else:
             response_dict.update({"current_product": product_names[0]})
+            # Return ToolMessage to satisfy the pending tool call
+            if tool_call_id:
+                response_dict["messages"] = [ToolMessage(
+                    content=f"Product validated: {product_names[0]}",
+                    tool_call_id=tool_call_id,
+                )]
 
     return response_dict
 
@@ -222,8 +250,6 @@ class Assistant:
                 or isinstance(result.content, list)
                 and not result.content[0].get("text")
             ):
-                messages = state["messages"] + [("user", "Respond with a real output.")]
-                state = {**state, "messages": messages}
                 messages = state["messages"] + [("user", "Respond with a real output.")]
                 state = {**state, "messages": messages}
             else:
