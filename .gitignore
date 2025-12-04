@@ -1,2 +1,32 @@
+# Environment files
+.env
+**/.env
+
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+
+# Data files (generated/downloaded)
+data/manuals_pdf/
+data/product/
+
+# Logging exports
+logging/exports/
+
+# Local testing and evaluations
+test/
+evaluations/
+
+# Docker volumes
 deploy/compose/volumes/
-notebooks/.ipynb_checkpoints
+
+# Jupyter
+notebooks/.ipynb_checkpoints/
+.ipynb_checkpoints/
+*.ipynb_checkpoints
