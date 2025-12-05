@@ -21,7 +21,7 @@ logging/exports/
 
 # Local testing and evaluations
 test/
-evaluations/
+# evaluations/  # Temporarily commented out to track evaluations folder
 
 # Docker volumes
 deploy/compose/volumes/

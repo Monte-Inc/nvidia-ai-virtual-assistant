@@ -1,0 +1,186 @@
+{
+  "description": "Tasks for evaluating order status lookup functionality",
+  "tasks": [
+    {
+      "id": "order_status_001",
+      "name": "Check delivered order status - Jetson Nano",
+      "category": "order_status",
+      "user_id": "4165",
+      "prompt": "What's the status of my Jetson Nano order?",
+      "ground_truth": {
+        "order_id": 52768,
+        "product_name": "JETSON NANO DEVELOPER KIT",
+        "order_status": "Delivered",
+        "order_date": "2024-10-05",
+        "scenario": "specific_product"
+      },
+      "response_must_contain": ["Delivered"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": [],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "order_status_002",
+      "name": "Check canceled order with reason - RTX 4060 Ti",
+      "category": "order_status",
+      "user_id": "4165",
+      "prompt": "Why was my RTX 4060 Ti order canceled?",
+      "ground_truth": {
+        "order_id": 15848,
+        "product_name": "NVIDIA® GEFORCE™ RTX 4060TI 8GB",
+        "order_status": "Canceled",
+        "notes": "Order canceled due to payment processing issues.",
+        "scenario": "canceled_order"
+      },
+      "response_must_contain": ["Canceled", "payment"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": [],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "order_status_003",
+      "name": "Check in-transit order with delay notes - Tee shirt",
+      "category": "order_status",
+      "user_id": "4165",
+      "prompt": "Why is my tee shirt order delayed?",
+      "ground_truth": {
+        "order_id": 62025,
+        "product_name": "GEFORCE ABSTRACTION TEE UNISEX",
+        "order_status": "In Transit",
+        "notes": "Order has been delayed due to shipping issues.",
+        "scenario": "order_with_notes"
+      },
+      "response_must_contain": ["shipping"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": [],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "order_status_004",
+      "name": "Check product not in history - RTX 5090",
+      "category": "order_status",
+      "user_id": "4165",
+      "prompt": "What's the status of my RTX 5090 order?",
+      "ground_truth": {
+        "product_name": "RTX 5090",
+        "exists": false,
+        "scenario": "product_not_found"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": ["Delivered", "Shipped", "In Transit"],
+      "tool_must_be_called": [],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "order_status_005",
+      "name": "Check shipped order status - Shield TV",
+      "category": "order_status",
+      "user_id": "5603",
+      "prompt": "What's the status of my Shield TV order?",
+      "ground_truth": {
+        "order_id": 54706,
+        "product_name": "NVIDIA® SHIELD™ TV 2019",
+        "order_status": "Shipped",
+        "scenario": "specific_product"
+      },
+      "response_must_contain": ["Shipped"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": [],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "order_status_006",
+      "name": "Check processing order with notes - Trekker Jacket",
+      "category": "order_status",
+      "user_id": "5603",
+      "prompt": "What's happening with my Trekker Jacket order?",
+      "ground_truth": {
+        "order_id": 46575,
+        "product_name": "NORTH FACE WOMEN'S TREKKER JACKET",
+        "order_status": "Processing",
+        "notes": "Processing delay due to high order volume.",
+        "scenario": "order_with_notes"
+      },
+      "response_must_contain": ["Processing"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": [],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "order_status_007",
+      "name": "Check cancelled order - RTX 4090",
+      "category": "order_status",
+      "user_id": "5603",
+      "prompt": "Why was my RTX 4090 order cancelled?",
+      "ground_truth": {
+        "order_id": 1643,
+        "product_name": "NVIDIA® GEFORCE RTX™ 4090",
+        "order_status": "Cancelled",
+        "notes": "Order cancelled due to payment issues.",
+        "scenario": "canceled_order"
+      },
+      "response_must_contain": ["payment"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": [],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "order_status_008",
+      "name": "Check pending order status - Shield TV",
+      "category": "order_status",
+      "user_id": "125",
+      "prompt": "What's the status of my Shield TV order?",
+      "ground_truth": {
+        "order_id": 74210,
+        "product_name": "NVIDIA® SHIELD™ TV 2019",
+        "order_status": "Pending",
+        "scenario": "specific_product"
+      },
+      "response_must_contain": ["Pending"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": [],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "order_status_009",
+      "name": "Check delayed order with notes - Ruler",
+      "category": "order_status",
+      "user_id": "6229",
+      "prompt": "Why is my Ruler order delayed?",
+      "ground_truth": {
+        "order_id": 29599,
+        "product_name": "RULER",
+        "order_status": "Delayed",
+        "notes": "Order has been delayed due to unforeseen shipping issues.",
+        "scenario": "order_with_notes"
+      },
+      "response_must_contain": ["shipping"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": [],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "order_status_010",
+      "name": "Check out for delivery status - Nike Polo",
+      "category": "order_status",
+      "user_id": "7154",
+      "prompt": "What's the status of my Nike Polo order?",
+      "ground_truth": {
+        "order_id": 28089,
+        "product_name": "NIKE 2.0 POLO MEN'S",
+        "order_status": "Out for Delivery",
+        "scenario": "specific_product"
+      },
+      "response_must_contain": ["Out for Delivery"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": [],
+      "tool_must_not_be_called": ["update_return"]
+    }
+  ],
+  "metadata": {
+    "total_tasks": 10,
+    "scenarios_covered": ["specific_product", "canceled_order", "order_with_notes", "product_not_found"],
+    "statuses_covered": ["Delivered", "Canceled", "Cancelled", "In Transit", "Shipped", "Processing", "Pending", "Delayed", "Out for Delivery"],
+    "users_covered": ["4165", "5603", "125", "6229", "7154"]
+  }
+}
