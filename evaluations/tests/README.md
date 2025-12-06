@@ -62,19 +62,23 @@ These tests run without external dependencies (no agent, no database connection)
 
 | File | Tests | Description |
 |------|-------|-------------|
-| `test_schema.py` | 11 | Schema model creation and validation |
-| `test_db.py` (partial) | 14 | CSV loading, column mapping, config |
-| `test_client.py` (partial) | 6 | SSE parsing, client initialization |
-| `test_verifiers.py` | 23 | All verification function logic |
+| `test_schema.py` | 14 | Schema model creation and validation |
+| `test_db.py` (partial) | 13 | CSV loading, column mapping, config |
+| `test_client.py` (partial) | 9 | SSE parsing, client initialization |
+| `test_verifiers.py` | 30 | All verification function logic |
+
+**Total: 66 unit tests**
 
 ### Integration Tests
 
-These tests require external services:
+These tests require external services and are skipped by default:
 
 | File | Tests | Requirements |
 |------|-------|--------------|
 | `test_db.py` | 2 | PostgreSQL database |
 | `test_client.py` | 3 | Running agent service |
+
+**Total: 5 integration tests**
 
 ## Test File Details
 

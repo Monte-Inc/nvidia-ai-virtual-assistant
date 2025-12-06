@@ -1,0 +1,195 @@
+{
+  "description": "Tasks for evaluating return status lookup functionality. These tasks test the agent's ability to check existing return statuses WITHOUT initiating new returns.",
+  "tasks": [
+    {
+      "id": "return_status_001",
+      "name": "Check approved return status - Shield Remote",
+      "category": "return_status",
+      "user_id": "4165",
+      "prompt": "What's the return status of my Shield Remote?",
+      "ground_truth": {
+        "order_id": 71110,
+        "product_name": "NVIDIA® SHIELD™ REMOTE (2020)",
+        "return_status": "Approved",
+        "return_reason": "Item stopped functioning correctly within a week.",
+        "scenario": "approved_return"
+      },
+      "response_must_contain": ["Approved"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "return_status_002",
+      "name": "Check pending approval return - RTX 4070 SUPER",
+      "category": "return_status",
+      "user_id": "4165",
+      "prompt": "What's the status of my RTX 4070 SUPER return?",
+      "ground_truth": {
+        "order_id": 13955,
+        "product_name": "NVIDIA® GEFORCE RTX™ 4070 SUPER",
+        "return_status": "Pending Approval",
+        "return_reason": "The performance did not meet expectations.",
+        "scenario": "pending_approval"
+      },
+      "response_must_contain": ["Pending"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "return_status_003",
+      "name": "Check rejected return with reason - Computer Care Kit",
+      "category": "return_status",
+      "user_id": "4165",
+      "prompt": "Why was my Computer Care Kit return rejected?",
+      "ground_truth": {
+        "order_id": 67932,
+        "product_name": "COMPUTER CARE KIT",
+        "return_status": "Rejected",
+        "return_reason": "Item was opened and used.",
+        "notes": "Return rejected as the product was not in original condition.",
+        "scenario": "rejected_return"
+      },
+      "response_must_contain": ["Rejected"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "return_status_004",
+      "name": "Check requested return status - RTX 4090",
+      "category": "return_status",
+      "user_id": "4165",
+      "prompt": "What's happening with my RTX 4090 return?",
+      "ground_truth": {
+        "order_id": 4065,
+        "product_name": "NVIDIA® GEFORCE RTX™ 4090",
+        "return_status": "Requested",
+        "return_reason": "Received a faulty unit that doesn't display correctly.",
+        "scenario": "requested_return"
+      },
+      "response_must_contain": ["Requested"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "return_status_005",
+      "name": "Check no return exists - Jetson Nano",
+      "category": "return_status",
+      "user_id": "4165",
+      "prompt": "What's the return status for my Jetson Nano order?",
+      "ground_truth": {
+        "order_id": 52768,
+        "product_name": "JETSON NANO DEVELOPER KIT",
+        "return_status": null,
+        "order_status": "Delivered",
+        "scenario": "no_return_exists"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": ["Approved", "Rejected", "Pending Approval"],
+      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "return_status_006",
+      "name": "Check approved return - RTX 4080",
+      "category": "return_status",
+      "user_id": "5603",
+      "prompt": "What's the status of my RTX 4080 return?",
+      "ground_truth": {
+        "order_id": 58681,
+        "product_name": "NVIDIA® GEFORCE RTX™ 4080",
+        "return_status": "Approved",
+        "return_reason": "Product did not meet performance expectations.",
+        "scenario": "approved_return"
+      },
+      "response_must_contain": ["Approved"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "return_status_007",
+      "name": "Check rejected return with warranty note - RTX 4070",
+      "category": "return_status",
+      "user_id": "5603",
+      "prompt": "Why was my RTX 4070 return rejected?",
+      "ground_truth": {
+        "order_id": 57160,
+        "product_name": "NVIDIA® GEFORCE RTX™ 4070",
+        "return_status": "Rejected",
+        "return_reason": "Not suitable for VR applications.",
+        "notes": "Performance issue not covered under warranty.",
+        "scenario": "rejected_return"
+      },
+      "response_must_contain": ["warranty"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "return_status_008",
+      "name": "Check pending return - RTX 4060 Ti",
+      "category": "return_status",
+      "user_id": "9522",
+      "prompt": "Is my RTX 4060 Ti return approved yet?",
+      "ground_truth": {
+        "order_id": 36447,
+        "product_name": "NVIDIA® GEFORCE™ RTX 4060TI 8GB",
+        "return_status": "Pending Approval",
+        "return_reason": "Incompatibility with existing hardware.",
+        "scenario": "pending_approval"
+      },
+      "response_must_contain": ["Pending"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "return_status_009",
+      "name": "Check rejected return - Shield TV Pro",
+      "category": "return_status",
+      "user_id": "7154",
+      "prompt": "What happened to my Shield TV Pro return?",
+      "ground_truth": {
+        "order_id": 34078,
+        "product_name": "NVIDIA® SHIELD™ TV PRO 2019",
+        "return_status": "Rejected",
+        "return_reason": "Device stopped working after one week.",
+        "notes": "Device malfunctioned and is not covered under warranty.",
+        "scenario": "rejected_return"
+      },
+      "response_must_contain": ["warranty"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "return_status_010",
+      "name": "Check approved return - Timbuk2 Laptop Sleeve",
+      "category": "return_status",
+      "user_id": "5603",
+      "prompt": "What's the status of my laptop sleeve return?",
+      "ground_truth": {
+        "order_id": 9145,
+        "product_name": "TIMBUK2 LAPTOP SLEEVE - 2 SIZES",
+        "return_status": "Approved",
+        "return_reason": "Size too small for my laptop.",
+        "scenario": "approved_return"
+      },
+      "response_must_contain": ["Approved"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_not_be_called": ["update_return"]
+    }
+  ],
+  "metadata": {
+    "total_tasks": 10,
+    "scenarios_covered": ["approved_return", "pending_approval", "rejected_return", "requested_return", "no_return_exists"],
+    "return_statuses_covered": ["Approved", "Pending Approval", "Rejected", "Requested", null],
+    "users_covered": ["4165", "5603", "9522", "7154"],
+    "critical_verification": "tool_must_not_be_called: update_return - ensures we are checking return status, NOT initiating a new return"
+  }
+}

@@ -7,11 +7,12 @@ This document outlines an **end-to-end evaluation framework** for the NVIDIA AI 
 1. Tests complete user tasks from start to finish (not internal mechanics)
 2. Uses real database data as ground truth for test generation
 3. Resets a test DB clone before each task for isolation
-4. Uses programmatic verification where possible, LLM judge where needed
+4. Uses programmatic verification for all checks
 5. Supports both single-turn and multi-turn conversations
-6. Integrates with LangSmith for tracing and analysis
 
 **Key Principle**: We evaluate whether the agent *accomplished the user's goal correctly*, not whether it took a specific internal path.
+
+**Current Status**: Phase 1 (Core Infrastructure) is complete. Phase 2 (Task Generation) is partially complete with order_status tasks implemented.
 
 ---
 
@@ -77,7 +78,9 @@ The agent is a **hierarchical multi-agent system** built with LangGraph:
 
 We categorize by **what the user is trying to accomplish**, not internal routing.
 
-### Category 1: Order Status Lookup
+**Important**: Categories are used for organization and reporting only. The verifier does NOT apply automatic checks based on category—each task must explicitly specify its verification criteria.
+
+### Category 1: Order Status Lookup ✅ IMPLEMENTED
 
 **User Goal**: Find out the status of an order.
 
@@ -88,13 +91,15 @@ We categorize by **what the user is trying to accomplish**, not internal routing
 | Canceled order | "Why was my RTX 4060 Ti canceled?" | Response explains cancellation reason |
 | Product not in history | "What about my RTX 5090?" | Response clarifies product not found |
 
-**Verification**:
-- Programmatic: Response contains exact `order_status` value from DB
-- Ground truth: Query DB for user's order before test
+**Verification** (must be explicitly set per task):
+- `response_must_contain`: The order status value from ground truth
+- `tool_must_not_be_called`: `["update_return"]` (optional, to ensure no side effects)
+
+**Status**: 10 tasks implemented in `tasks/order_status.json`
 
 ---
 
-### Category 2: Return Status Lookup
+### Category 2: Return Status Lookup 🔲 NOT YET IMPLEMENTED
 
 **User Goal**: Check the status of an existing return (NOT initiate a new one).
 
@@ -105,13 +110,13 @@ We categorize by **what the user is trying to accomplish**, not internal routing
 | Rejected return | "What happened to my Computer Care Kit return?" | Response contains "Rejected" + reason |
 | No return exists | "What's the return status for my mousepad?" | Response indicates no return initiated |
 
-**Verification**:
-- Programmatic: Response contains correct `return_status` from DB
-- **Critical check**: `update_return` tool must NOT be called (this distinguishes status lookup from initiation)
+**Verification** (must be explicitly set per task):
+- `response_must_contain`: The return status value
+- `tool_must_not_be_called`: `["update_return"]` — **Critical** to distinguish from return initiation
 
 ---
 
-### Category 3: Return Initiation
+### Category 3: Return Initiation 🔲 NOT YET IMPLEMENTED
 
 **User Goal**: Start a return for a product.
 
@@ -122,15 +127,15 @@ We categorize by **what the user is trying to accomplish**, not internal routing
 | Not yet delivered | "Return my tee shirt" | Response explains can't return yet, no DB change |
 | Outside return window | "Return my [old order]" | Response explains window expired, no DB change |
 
-**Verification**:
-- Programmatic: Query DB after test to verify `return_status` changed (or didn't)
-- Check `update_return` tool called only when appropriate
+**Verification** (must be explicitly set per task):
+- `tool_must_be_called`: `["update_return"]` for valid returns
+- `expected_db_state`: `{"return_status": "Requested"}` to verify DB was updated
 
-**Note**: Agent uses `interrupt_before` for `update_return`. For evals, we'll auto-approve the interrupt in eval mode.
+**Note**: Agent uses `interrupt_before` for `update_return`. The `AgentClient` supports `auto_approve_interrupts=True` to handle this in eval mode.
 
 ---
 
-### Category 4: Product QA
+### Category 4: Product QA 🔲 NOT YET IMPLEMENTED
 
 **User Goal**: Get information about a product (specs, warranty, troubleshooting, policies).
 
@@ -141,16 +146,14 @@ We categorize by **what the user is trying to accomplish**, not internal routing
 | Troubleshooting | "My Shield TV won't turn on" | Response contains troubleshooting steps |
 | Policy question | "What's your return policy?" | Response contains policy info |
 
-**Verification**:
-- Programmatic: `canonical_rag` tool was called
-- **LLM Judge**: Given the source chunk that contains the answer, verify the response accurately communicates that information
-  - Binary score: Did the response capture the key information?
-  - Can provide more detailed scoring if needed
-  - On failure, LLM summarizes what was missing or incorrect
+**Verification options**:
+- Programmatic: `tool_must_be_called: ["canonical_rag"]`
+- Programmatic: `response_must_contain` with key facts from source docs
+- **LLM Judge** (planned): Given the source chunk, verify the response accurately communicates that information
 
 ---
 
-### Category 5: Out-of-Scope Handling
+### Category 5: Out-of-Scope Handling 🔲 NOT YET IMPLEMENTED
 
 **User Goal**: (Various off-topic requests)
 
@@ -160,15 +163,15 @@ We categorize by **what the user is trying to accomplish**, not internal routing
 | Unrelated product | "Tell me about iPhones" | Explains scope limitation |
 | General chat | "How are you?" | Friendly but redirects to assistance |
 
-**Verification**:
-- Programmatic: No sub-agent tools called (or only `HandleOtherTalk`)
-- Response contains redirect/scope language
+**Verification** (must be explicitly set per task):
+- `response_must_contain`: Redirect/scope language keywords
+- `tool_must_not_be_called`: Sub-agent tools (optional)
 
 ---
 
 ## Single-Turn vs Multi-Turn
 
-### Single-Turn Tasks
+### Single-Turn Tasks ✅ IMPLEMENTED
 
 Most tasks can be evaluated in a single turn:
 - User sends one message
@@ -177,33 +180,37 @@ Most tasks can be evaluated in a single turn:
 
 **No LLM simulator needed** - just a static prompt.
 
-### Multi-Turn Tasks
+### Multi-Turn Tasks ✅ SCHEMA READY, NO TASKS YET
 
-Some scenarios require multiple turns:
-- Agent asks for clarification → User provides it → Agent responds
-- Follow-up questions about the same topic
-- Topic switching mid-conversation
+The schema and runner support multi-turn via:
+- `turns: "multi"`
+- `followup_prompts: ["follow-up 1", "follow-up 2"]`
+
+The `AgentClient.invoke_multi_turn()` method handles sequential invocation.
 
 **For multi-turn**:
-- Option A: Pre-scripted follow-up messages (deterministic)
-- Option B: LLM-simulated user responses (more realistic but adds variance)
-
-We'll start with single-turn and add multi-turn later.
+- Option A: Pre-scripted follow-up messages (deterministic) ← **Implemented**
+- Option B: LLM-simulated user responses (more realistic but adds variance) ← **Not implemented**
 
 ---
 
 ## Test Data Strategy
 
-### Using Real Database Data
+### Using Real Database Data ✅ IMPLEMENTED
 
-Tasks are generated from actual DB records, ensuring consistency:
+Tasks are generated from actual DB records, ensuring consistency. The `TestDatabase` class supports:
+- Loading baseline data from CSV (`load_baseline_from_csv`)
+- Querying customer orders (`get_orders_by_customer`, `get_order`)
+- Getting customer summaries for task generation (`get_customer_summary`)
 
+Example task generation pattern:
 ```python
 def generate_order_status_task(user_id: str, order: dict) -> EvalTask:
     """Generate an order status task from real DB data."""
     return EvalTask(
         id=f"order_status_{user_id}_{order['order_id']}",
-        category="order_status",
+        name=f"Check {order['product_name']} order status",
+        category=TaskCategory.ORDER_STATUS,
         user_id=user_id,
         prompt=f"What's the status of my {order['product_name']} order?",
         ground_truth={
@@ -214,12 +221,12 @@ def generate_order_status_task(user_id: str, order: dict) -> EvalTask:
     )
 ```
 
-### Database Reset Strategy
+### Database Reset Strategy ✅ IMPLEMENTED
 
-Before each task:
-1. Reset test DB to known baseline state (clone of production schema + test data)
-2. Run the evaluation task
-3. Verify final DB state (for write operations like `update_return`)
+The `EvalRunner` with `reset_db_per_task=True`:
+1. Resets test DB to known baseline state before each task
+2. Runs the evaluation task
+3. Verifies final DB state (for write operations like `update_return`)
 
 This allows:
 - Any user's data to be used for testing
@@ -228,76 +235,132 @@ This allows:
 
 ---
 
-## Task Definition Schema
+## Implementation Status
 
-```python
-@dataclass
-class EvalTask:
-    # Identity
-    id: str
-    name: str
-    category: str  # order_status, return_status, return_init, product_qa, out_of_scope
+### What's Built
 
-    # Test setup
-    user_id: str
-    prompt: str  # The user's message
-    turns: Literal["single", "multi"] = "single"
-    followup_prompts: list[str] = None  # For multi-turn (scripted)
+#### Core Infrastructure (`evaluations/core/`)
 
-    # Ground truth (from DB, populated at task generation time)
-    ground_truth: dict = None
+| Module | Status | Description |
+|--------|--------|-------------|
+| `schema.py` | ✅ Complete | Pydantic models: `EvalTask`, `EvalResult`, `TaskCategory`, `TaskStatus`, `VerificationResult` |
+| `db.py` | ✅ Complete | `TestDatabase` class with CSV loading, reset, query, and verify methods |
+| `client.py` | ✅ Complete | `AgentClient` with HTTP and direct modes, auto-approve interrupts |
+| `verifiers.py` | ✅ Complete | All programmatic verifiers implemented |
+| `runner.py` | ✅ Complete | `EvalRunner`, `RunConfig`, `RunSummary`, task loading from JSON |
 
-    # Programmatic verification
-    response_must_contain: list[str] = None
-    response_must_not_contain: list[str] = None
-    tool_must_be_called: list[str] = None
-    tool_must_not_be_called: list[str] = None
-    expected_db_state: dict = None  # For write operations
+#### Tasks
 
-    # LLM Judge (for Product QA)
-    use_llm_judge: bool = False
-    judge_context: str = None  # The source chunk/doc to verify against
-    judge_criteria: str = None  # What to evaluate
-```
+| Category | Status | File | Count |
+|----------|--------|------|-------|
+| Order Status | ✅ Complete | `tasks/order_status.json` | 10 tasks |
+| Return Status | 🔲 Not started | - | - |
+| Return Initiation | 🔲 Not started | - | - |
+| Product QA | 🔲 Not started | - | - |
+| Out-of-Scope | 🔲 Not started | - | - |
+
+#### Tests (`evaluations/tests/`)
+
+| File | Status | Tests |
+|------|--------|-------|
+| `test_schema.py` | ✅ Complete | 11 tests |
+| `test_db.py` | ✅ Complete | 14 tests (2 integration) |
+| `test_client.py` | ✅ Complete | 10 tests (3 integration) |
+| `test_verifiers.py` | ✅ Complete | 23 tests |
+
+#### Tools
+
+| Tool | Status | Description |
+|------|--------|-------------|
+| `tools/view_tasks.py` | ✅ Complete | CLI for viewing/filtering tasks |
+| `test_flow.py` | ✅ Complete | Integration test script |
 
 ---
 
-## Verification Functions
+## Implementation Phases
 
-### Programmatic Verifiers
+### Phase 1: Core Infrastructure ✅ COMPLETE
+- [x] Task definition schema (`EvalTask` Pydantic model)
+- [x] Agent client (invoke agent with user_id + message, HTTP and direct modes)
+- [x] Database utilities (CSV loading, reset, query, verify)
+- [x] Programmatic verifiers (response content, tool calls, DB state)
+- [x] Task runner (`EvalRunner` with `run_task`, `run`, `run_from_file`, `run_from_directory`)
+- [x] Task loading from JSON files
+- [x] Report generation (`RunSummary.format_report()`)
+- [x] Unit tests for all core modules
 
-```python
-def verify_response_contains(response: str, values: list[str]) -> dict:
-    """Check if response contains expected values."""
-    found = [v for v in values if v.lower() in response.lower()]
-    missing = [v for v in values if v.lower() not in response.lower()]
-    return {
-        "passed": len(missing) == 0,
-        "found": found,
-        "missing": missing,
-    }
+### Phase 2: Task Generation 🔶 IN PROGRESS
+- [x] Order Status tasks (10 tasks covering various scenarios)
+- [ ] Return Status tasks
+- [ ] Return Initiation tasks
+- [ ] Product QA tasks
+- [ ] Out-of-Scope tasks
+- Target: 30-40 tasks across categories
 
-def verify_tool_called(trace: dict, tool_name: str) -> bool:
-    """Check if a specific tool was called."""
-    all_tools = extract_all_tool_calls(trace)
-    return tool_name in all_tools
+### Phase 3: LLM Judge 🔲 NOT STARTED
+- [ ] Implement `llm_judge_rag_accuracy()` in verifiers
+- [ ] Integrate LLM judge into `Verifier.verify_task()` when `use_llm_judge=True`
+- [ ] Identify source docs indexed in RAG system
+- [ ] Create Product QA tasks with `judge_context` populated
+- [ ] Test on Product QA category
 
-def verify_tool_not_called(trace: dict, tool_name: str) -> bool:
-    """Verify a tool was NOT called."""
-    return not verify_tool_called(trace, tool_name)
+### Phase 4: Additional Verifiers 🔲 NOT STARTED
+- [ ] Integrate regex pattern matching into Verifier class
+- [ ] Integrate tool argument verification into Verifier class
+- [ ] Implement LLM failure summarization
 
-def verify_db_state(user_id: str, order_id: str, expected: dict) -> dict:
-    """Query database and verify expected state after task."""
-    actual = query_order(user_id, order_id)
-    matches = all(actual.get(k) == v for k, v in expected.items())
-    return {
-        "passed": matches,
-        "expected": expected,
-        "actual": actual,
-    }
-```
+### Phase 5: Reporting Enhancements 🔲 NOT STARTED
+- [ ] Failure mode clustering
+- [ ] Latency percentiles (P95, P99)
+- [ ] Export results to JSON/CSV
 
-### LLM Judge (for Product QA)
+### Phase 6: Multi-Turn Tasks 🔲 NOT STARTED
+- [ ] Create multi-turn task definitions
+- [ ] Test disambiguation scenarios
+- [ ] Test follow-up question handling
+- [ ] (Future) LLM user simulator
+
+### Phase 7: Failure Analytics 🔲 NOT STARTED
+- [ ] LLM-powered failure summarization
+- [ ] Failure pattern detection across runs
+- [ ] Actionable insights for agent improvement
+
+---
+
+## Design Decisions
+
+### Resolved
+
+1. **Test data source**: Use real DB data from CSV, reset test DB before each task
+2. **Single vs multi-turn**: Schema supports both; started with single-turn tasks
+3. **Interrupt handling**: `AgentClient` supports `auto_approve_interrupts=True`
+4. **Task-driven verification**: Each task explicitly specifies its verification criteria (no automatic category-based checks)
+5. **Failure summary**: Generated from verification error messages (no LLM summarization)
+
+### Design Evolution
+
+During implementation, we made these changes from the original plan:
+
+1. **Removed automatic category-based verification**: Originally planned for the verifier to automatically apply checks based on category (e.g., RETURN_STATUS always checks that `update_return` wasn't called). Changed to task-driven approach where each task explicitly specifies all verification criteria. This is more flexible and explicit.
+
+2. **Deferred LLM judge**: Originally planned to implement LLM-based judging for Product QA accuracy. Deferred to focus on programmatic verification first. The schema has fields (`use_llm_judge`, `judge_context`, `judge_criteria`) but no implementation exists.
+
+3. **Deferred LLM failure summarization**: Originally planned to use LLM to summarize failure modes. Currently using simple string concatenation of verification errors.
+
+4. **Simplified reporting**: The report format is simpler than originally envisioned—focuses on pass/fail counts and failed task details rather than "common failure mode" clustering.
+
+---
+
+## Future Work
+
+### LLM Judge for Product QA
+
+For semantic accuracy verification, an LLM judge will:
+- Compare agent response against source document chunks
+- Score accuracy on a 0-1 scale
+- Explain what was missing or incorrect
+
+**Planned implementation**:
 
 ```python
 def llm_judge_rag_accuracy(response: str, source_chunk: str, question: str) -> dict:
@@ -333,86 +396,27 @@ Provide:
 
 Return as JSON: {{"score": 0|1, "explanation": "...", "failure_summary": "..."}}
 """
-    # Call LLM and parse response
     result = call_judge_llm(prompt)
     return result
 ```
 
----
+**Prerequisites**:
+- Identify which docs are indexed in the RAG system
+- Create a mapping from product questions to source chunks
+- Implement the judge LLM call in `verifiers.py`
 
-## Execution Flow
+The schema already has fields for this (`use_llm_judge`, `judge_context`, `judge_criteria`).
 
-```python
-def run_eval_task(task: EvalTask) -> EvalResult:
-    # 1. Reset database to baseline
-    reset_test_database()
+### LLM Failure Summarization
 
-    # 2. Run the conversation
-    if task.turns == "single":
-        trace = call_agent(task.prompt, task.user_id)
-        response = extract_final_response(trace)
-    else:
-        # Multi-turn: iterate through prompts
-        response, trace = run_multi_turn(task)
+For debugging at scale, an LLM could:
+- Analyze failed tasks and categorize failure modes
+- Identify patterns across failures
+- Suggest root causes
 
-    # 3. Run verifications
-    results = {}
-
-    # Response content checks
-    if task.response_must_contain:
-        results["content"] = verify_response_contains(response, task.response_must_contain)
-
-    if task.response_must_not_contain:
-        results["forbidden_content"] = verify_response_not_contains(response, task.response_must_not_contain)
-
-    # Tool call checks
-    if task.tool_must_be_called:
-        results["required_tools"] = all(verify_tool_called(trace, t) for t in task.tool_must_be_called)
-
-    if task.tool_must_not_be_called:
-        results["forbidden_tools"] = all(verify_tool_not_called(trace, t) for t in task.tool_must_not_be_called)
-
-    # Database state checks
-    if task.expected_db_state:
-        results["db_state"] = verify_db_state(task.user_id, task.ground_truth["order_id"], task.expected_db_state)
-
-    # LLM Judge (for Product QA)
-    if task.use_llm_judge:
-        results["llm_judge"] = llm_judge_rag_accuracy(response, task.judge_context, task.prompt)
-
-    # 4. Aggregate results
-    passed = all(
-        r if isinstance(r, bool) else r.get("passed", r.get("score", 0) == 1)
-        for r in results.values()
-    )
-
-    return EvalResult(
-        task_id=task.id,
-        category=task.category,
-        passed=passed,
-        results=results,
-        response=response,
-        trace=trace,
-    )
-```
-
----
-
-## Failure Analysis
-
-When a task fails, we want actionable insights:
+**Planned implementation**:
 
 ```python
-@dataclass
-class EvalResult:
-    task_id: str
-    category: str
-    passed: bool
-    results: dict
-    response: str
-    trace: dict
-    failure_summary: str = None  # LLM-generated summary of what went wrong
-
 def summarize_failure(result: EvalResult) -> str:
     """Use LLM to summarize failure mode for debugging."""
     if result.passed:
@@ -424,7 +428,7 @@ Task: {result.task_id}
 Category: {result.category}
 
 Verification Results:
-{json.dumps(result.results, indent=2)}
+{json.dumps(result.verifications, indent=2)}
 
 Agent Response:
 {result.response}
@@ -434,130 +438,75 @@ What was the failure mode?"""
     return call_llm(prompt)
 ```
 
+### LLM User Simulator
+
+For realistic multi-turn testing:
+- Simulate user responses to agent clarification questions
+- Generate varied phrasings of the same intent
+- Test edge cases and ambiguous inputs
+
+This would replace pre-scripted `followup_prompts` with dynamic responses.
+
 ---
 
-## Metrics and Reporting
+## Test Users
 
-### Per-Task Metrics
+Key users identified for task generation:
 
-| Metric | Type | Description |
-|--------|------|-------------|
-| passed | bool | Overall pass/fail |
-| response_accurate | bool | Response contains expected info |
-| no_forbidden_tools | bool | No forbidden tools called |
-| db_state_correct | bool | Database changes as expected |
-| llm_judge_score | float | LLM judge score (0-1) |
-| latency_ms | float | End-to-end time |
+| User ID | Orders | Notable Data |
+|---------|--------|--------------|
+| `4165` | 10 | Jetson Nano (Delivered), RTX 4090 (Return Requested), various statuses |
+| `5603` | Multiple | Shield TV (Shipped), cancelled orders |
+| `125` | Multiple | Pending orders |
+| `6229` | Multiple | Delayed orders with notes |
+| `7154` | Multiple | Out for Delivery status |
 
-### Aggregate Metrics
+---
 
-| Metric | Formula |
-|--------|---------|
-| Overall Pass Rate | passed_count / total_count |
-| Pass Rate by Category | per-category pass rates |
-| Average Latency | mean(latency_ms) |
-| P95 Latency | percentile(latency, 95) |
+## Running Evaluations
 
-### Report Format
+### Quick Start
 
-```
-NVIDIA Agent Evaluation Report
-==============================
-Run Date: 2024-12-04
-Total Tasks: 40
-Passed: 36 (90%)
+```python
+import asyncio
+from evaluations.core import run_evaluation
 
-By Category:
-  order_status:   10/10 (100%)
-  return_status:  8/10 (80%)   <-- ATTENTION
-  return_init:    8/10 (80%)   <-- ATTENTION
-  product_qa:     5/5 (100%)
-  out_of_scope:   5/5 (100%)
+async def main():
+    # Run all tasks from tasks directory
+    summary = await run_evaluation()
+    print(summary.format_report())
 
-Failed Tasks:
-  - return_status_003: update_return called when checking status
-    → Agent misinterpreted status query as return request
-  - return_status_007: Response missing "Pending Approval"
-    → Agent returned wrong status value
-  - return_init_002: DB not updated after return request
-    → update_return tool failed silently
-
-Common Failure Modes:
-  - Return status vs initiation confusion (2 cases)
-  - Missing information in response (1 case)
+asyncio.run(main())
 ```
 
----
+### Run Specific Categories
 
-## Implementation Phases
+```python
+summary = await run_evaluation(categories=["order_status"])
+```
 
-### Phase 1: Core Infrastructure
-- [ ] Task definition schema (`EvalTask` dataclass)
-- [ ] Agent client (invoke agent with user_id + message)
-- [ ] Database reset utility (reset test DB to baseline)
-- [ ] Basic programmatic verifiers
-- [ ] Single-task runner
+### Run from File
 
-### Phase 2: Task Generation
-- [ ] Query DB to find users with diverse data patterns
-- [ ] Generate tasks from real data for each category:
-  - [ ] Order Status tasks
-  - [ ] Return Status tasks
-  - [ ] Return Initiation tasks
-  - [ ] Product QA tasks (need to identify source docs)
-  - [ ] Out-of-Scope tasks (can be hand-written)
-- [ ] Target: 30-40 tasks across categories
+```python
+summary = await run_evaluation(file_path="evaluations/tasks/order_status.json")
+```
 
-### Phase 3: LLM Judge
-- [ ] Implement RAG accuracy judge
-- [ ] Implement failure summarizer
-- [ ] Test on Product QA category
+### Run Tests
 
-### Phase 4: Reporting & Analysis
-- [ ] Aggregate metrics calculation
-- [ ] Report generation
-- [ ] Failure mode clustering
+```bash
+# Unit tests only
+pytest evaluations/tests/ -v -m "not integration"
 
-### Phase 5: Multi-Turn & Simulator (Future)
-- [ ] Add scripted multi-turn tasks
-- [ ] Implement LLM user simulator
-- [ ] Add disambiguation scenarios
-
-### Phase 6: CI/CD Integration (Future)
-- [ ] Run evals on PR
-- [ ] Regression detection
-- [ ] Automated reporting
-
----
-
-## Resolved Design Decisions
-
-1. **Test data source**: Use real DB data, reset test DB before each task
-2. **Single vs multi-turn**: Start with single-turn, add multi-turn later
-3. **Product QA verification**: LLM judge with source chunk as context
-4. **Failure analysis**: LLM summarizes failure modes as they happen
-5. **Interrupt handling**: Auto-approve `update_return` interrupt in eval mode
-
----
-
-## Open Questions
-
-1. **Which users have the most diverse data for task generation?**
-   - Need to query DB to find good candidates
-
-2. **Source documents for Product QA**:
-   - Which docs are indexed in the RAG system?
-   - How do we get the "correct" chunk to give to the judge?
-
-3. **Eval mode configuration**:
-   - How do we configure agent to auto-approve interrupts?
-   - Separate endpoint or config flag?
+# All tests (requires agent and DB)
+pytest evaluations/tests/ -v
+```
 
 ---
 
 ## Next Steps
 
-1. Set up the test database reset mechanism
-2. Query production DB to identify users with diverse order/return data
-3. Implement core task runner and verifiers
-4. Generate initial set of tasks from real data
+1. **Create return_status tasks** - Query DB for users with existing returns, create task JSON
+2. **Create return_init tasks** - Query DB for users with delivered orders that can be returned
+3. **Create product_qa tasks** - Identify key product questions and expected answers
+4. **Create out_of_scope tasks** - Hand-write common off-topic queries
+5. **Run full evaluation** - Test against live agent, analyze results

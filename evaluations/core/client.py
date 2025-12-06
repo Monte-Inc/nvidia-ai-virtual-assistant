@@ -180,7 +180,16 @@ class AgentClient:
         This mode provides full access to trace data and tool calls.
         """
         # Import here to avoid circular imports and allow HTTP-only usage
-        from src.agent.main import graph
+        # Suppress noisy startup messages during import
+        import io
+        import sys
+        _stdout, _stderr = sys.stdout, sys.stderr
+        sys.stdout = io.StringIO()
+        sys.stderr = io.StringIO()
+        try:
+            from src.agent.main import graph
+        finally:
+            sys.stdout, sys.stderr = _stdout, _stderr
 
         if session_id is None:
             session_id = str(uuid4())

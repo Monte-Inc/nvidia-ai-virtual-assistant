@@ -8,7 +8,6 @@ The evaluation framework tests whether the agent **accomplishes user goals corre
 
 - Single-turn and multi-turn conversations
 - Programmatic verification (response content, tool calls, database state)
-- LLM-based judging for semantic evaluation (Product QA)
 - Database isolation via reset between tasks
 - Detailed reporting with failure analysis
 
@@ -20,7 +19,7 @@ core/
 ├── client.py      # Agent invocation client
 ├── db.py          # Test database management
 ├── verifiers.py   # Verification functions
-└── runner.py      # Evaluation orchestration
+└── runner.py      # Task loading and evaluation orchestration
 ```
 
 ## Quick Start
@@ -114,11 +113,6 @@ EvalTask(
     tool_must_be_called=["get_purchase_history"],
     tool_must_not_be_called=["update_return"],
     expected_db_state={"return_status": "Requested"},
-
-    # LLM Judge (for Product QA)
-    use_llm_judge=False,
-    judge_context="Source document text...",
-    judge_criteria="Response accurately states warranty period",
 )
 ```
 
@@ -146,7 +140,7 @@ result.all_verifications_passed  # True if all checks passed
 
 ### Client (`client.py`)
 
-Provides the `AgentClient` for invoking the agent.
+Provides the `AgentClient` for invoking the agent via direct LangGraph invocation.
 
 #### AgentClient
 
@@ -154,8 +148,7 @@ Provides the `AgentClient` for invoking the agent.
 from evaluations.core import AgentClient
 
 async with AgentClient(
-    base_url="http://localhost:8081",
-    mode="http",  # or "direct" for LangGraph
+    mode="direct",
     auto_approve_interrupts=True,
 ) as client:
     # Create session
@@ -168,7 +161,7 @@ async with AgentClient(
         session_id=session_id,
     )
     print(response.content)
-    print(response.tool_calls)  # Available in direct mode
+    print(response.tool_calls)
     print(response.latency_ms)
 
     # Multi-turn conversation
@@ -181,12 +174,12 @@ async with AgentClient(
     await client.end_session(session_id)
 ```
 
-#### Modes
+#### Direct Mode
 
-| Mode | Description | Tool Calls | Use Case |
-|------|-------------|------------|----------|
-| `http` | Calls agent via FastAPI `/generate` endpoint | Not available | Production testing |
-| `direct` | Invokes LangGraph directly | Full access | Evaluation with trace |
+Evaluations use direct LangGraph invocation (not HTTP) to ensure:
+- **Database isolation**: The test database environment variable is read by the agent
+- **Full trace access**: Tool calls, inputs, and outputs are captured
+- **No external dependencies**: No need for running Docker containers
 
 #### Auto-Approve Interrupts
 
@@ -338,8 +331,7 @@ from pathlib import Path
 
 config = RunConfig(
     # Agent settings
-    agent_base_url="http://localhost:8081",
-    agent_mode="http",
+    agent_mode="direct",
     auto_approve_interrupts=True,
 
     # Database settings
@@ -348,12 +340,10 @@ config = RunConfig(
     csv_path=Path("data/orders.csv"),
 
     # Execution settings
-    max_concurrent_tasks=1,
     timeout_seconds=120.0,
 
     # Output settings
     verbose=True,
-    save_traces=True,
 )
 ```
 
@@ -400,15 +390,102 @@ from evaluations.core import run_evaluation
 summary = await run_evaluation(tasks, config)
 ```
 
-## Verification Strategy by Category
+### Task Loading (`runner.py`)
 
-| Category | Response Checks | Tool Checks | DB Checks |
-|----------|-----------------|-------------|-----------|
-| ORDER_STATUS | Must contain order status | - | - |
-| RETURN_STATUS | Must contain return status | Must NOT call `update_return` | - |
-| RETURN_INIT | Must confirm return | Must call `update_return` | `return_status = "Requested"` |
-| PRODUCT_QA | LLM judge evaluates accuracy | Must call `canonical_rag` | - |
-| OUT_OF_SCOPE | Contains redirect language | No sub-agent tools | - |
+Functions for loading tasks from JSON files.
+
+#### JSON Task File Format
+
+Task files should be JSON with a `tasks` array:
+
+```json
+{
+  "description": "Tasks for evaluating order status lookup",
+  "tasks": [
+    {
+      "id": "order_status_001",
+      "name": "Check delivered order status",
+      "category": "order_status",
+      "user_id": "4165",
+      "prompt": "What's the status of my Jetson Nano order?",
+      "ground_truth": {
+        "order_id": 52768,
+        "order_status": "Delivered"
+      },
+      "response_must_contain": ["Delivered"],
+      "tool_must_not_be_called": ["update_return"]
+    }
+  ],
+  "metadata": {
+    "total_tasks": 1
+  }
+}
+```
+
+#### Loading Tasks
+
+```python
+from evaluations.core import (
+    load_tasks_from_file,
+    load_tasks_from_directory,
+    list_task_files,
+)
+
+# Load from a single JSON file
+tasks = load_tasks_from_file("evaluations/tasks/order_status.json")
+
+# Load all tasks from the tasks directory
+tasks = load_tasks_from_directory()
+
+# Load specific categories only
+tasks = load_tasks_from_directory(categories=["order_status", "return_status"])
+
+# Load from a custom directory
+tasks = load_tasks_from_directory(tasks_dir="/path/to/tasks")
+
+# List available task files
+files = list_task_files()
+# [Path("evaluations/tasks/order_status.json"), ...]
+```
+
+#### Running from Files
+
+The `EvalRunner` can load and run tasks directly from files:
+
+```python
+from evaluations.core import EvalRunner, RunConfig
+
+runner = EvalRunner(RunConfig(verbose=True))
+
+# Run tasks from a specific file
+summary = await runner.run_from_file("evaluations/tasks/order_status.json")
+
+# Run all tasks from the tasks directory
+summary = await runner.run_from_directory()
+
+# Run specific categories
+summary = await runner.run_from_directory(categories=["order_status"])
+```
+
+#### Convenience Function (Extended)
+
+The `run_evaluation` function supports multiple calling patterns:
+
+```python
+from evaluations.core import run_evaluation
+
+# Run with explicit task list
+summary = await run_evaluation(tasks=my_tasks)
+
+# Run from a JSON file
+summary = await run_evaluation(file_path="evaluations/tasks/order_status.json")
+
+# Run specific categories from tasks directory
+summary = await run_evaluation(categories=["order_status", "return_status"])
+
+# Run all tasks from tasks directory (default)
+summary = await run_evaluation()
+```
 
 ## Example: Complete Evaluation
 
@@ -440,7 +517,7 @@ tasks = [
         prompt="What's the return status for my RTX 4090?",
         ground_truth={"order_id": 4065, "return_status": "Requested"},
         response_must_contain=["Requested"],
-        tool_must_not_be_called=["update_return"],  # Critical!
+        tool_must_not_be_called=["update_return"],
     ),
     EvalTask(
         id="return_init_001",

@@ -14,7 +14,15 @@ from .verifiers import (
     verify_tools_not_called,
     verify_db_state,
 )
-from .runner import EvalRunner, RunConfig, RunSummary, run_evaluation
+from .runner import (
+    EvalRunner,
+    RunConfig,
+    RunSummary,
+    run_evaluation,
+    load_tasks_from_file,
+    load_tasks_from_directory,
+    list_task_files,
+)
 
 __all__ = [
     # Schema
@@ -43,4 +51,8 @@ __all__ = [
     "RunConfig",
     "RunSummary",
     "run_evaluation",
+    # Task loading
+    "load_tasks_from_file",
+    "load_tasks_from_directory",
+    "list_task_files",
 ]
