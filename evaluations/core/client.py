@@ -188,8 +188,17 @@ class AgentClient:
         sys.stderr = io.StringIO()
         try:
             from src.agent.main import graph
+            from src.agent.tools import update_return
         finally:
             sys.stdout, sys.stderr = _stdout, _stderr
+
+        # Clear the LRU cache on update_return tool to ensure fresh DB operations
+        # This is necessary because the tool has @lru_cache which would otherwise
+        # return cached results without executing the actual database update
+        if hasattr(update_return, 'func') and hasattr(update_return.func, 'cache_clear'):
+            update_return.func.cache_clear()
+            logger.debug("Cleared update_return LRU cache")
+
 
         if session_id is None:
             session_id = str(uuid4())
@@ -210,6 +219,38 @@ class AgentClient:
 
         content = ""
         last_content = ""
+        seen_tool_calls: set[str] = set()  # Track seen tool calls to avoid duplicates
+
+        def _extract_tool_calls_from_event(event: dict) -> None:
+            """Extract tool calls from various event types, deduplicating by name."""
+            kind = event["event"]
+            data = event.get("data", {})
+
+            # From actual tool execution (on_tool_start)
+            if kind == "on_tool_start":
+                name = event.get("name", "")
+                if name and name not in seen_tool_calls:
+                    seen_tool_calls.add(name)
+                    tool_calls.append({
+                        "name": name,
+                        "input": data.get("input", {}),
+                    })
+
+            # From chain end events - captures routing tools like HandleOtherTalk
+            # These are Pydantic schemas used for routing, not actual tool executions
+            elif kind == "on_chain_end":
+                output = data.get("output", {})
+                if isinstance(output, dict) and "messages" in output:
+                    msgs = output["messages"]
+                    if hasattr(msgs, "tool_calls") and msgs.tool_calls:
+                        for tc in msgs.tool_calls:
+                            name = tc.get("name", "")
+                            if name and name not in seen_tool_calls:
+                                seen_tool_calls.add(name)
+                                tool_calls.append({
+                                    "name": name,
+                                    "input": tc.get("args", {}),
+                                })
 
         async for event in graph.astream_events(
             input_for_graph, version="v2", config=config
@@ -218,12 +259,7 @@ class AgentClient:
             tags = event.get("tags", [])
             trace_events.append({"event": kind, "name": event.get("name", "")})
 
-            # Capture tool calls
-            if kind == "on_tool_start":
-                tool_calls.append({
-                    "name": event.get("name", ""),
-                    "input": event.get("data", {}).get("input", {}),
-                })
+            _extract_tool_calls_from_event(event)
 
             # Capture streaming content
             if kind == "on_chat_model_stream" and "should_stream" in tags:
@@ -247,16 +283,13 @@ class AgentClient:
         interrupted = bool(snapshot.next)
 
         if interrupted and self.auto_approve_interrupts:
-            # Auto-approve the interrupt
+            # Auto-approve the interrupt by resuming the graph
+            logger.debug(f"Auto-approving interrupt, resuming graph for session {session_id}")
             async for event in graph.astream_events(None, version="v2", config=config):
                 kind = event["event"]
                 tags = event.get("tags", [])
 
-                if kind == "on_tool_start":
-                    tool_calls.append({
-                        "name": event.get("name", ""),
-                        "input": event.get("data", {}).get("input", {}),
-                    })
+                _extract_tool_calls_from_event(event)
 
                 if kind == "on_chat_model_stream" and "should_stream" in tags:
                     chunk = event["data"]["chunk"].content

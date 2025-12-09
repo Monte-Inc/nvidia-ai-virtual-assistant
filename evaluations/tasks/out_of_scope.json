@@ -1,0 +1,80 @@
+{
+  "description": "Tasks for evaluating out-of-scope query handling and proper routing to HandleOtherTalk",
+  "tasks": [
+    {
+      "id": "out_of_scope_001",
+      "name": "Greeting - friendly response",
+      "category": "out_of_scope",
+      "user_id": "4165",
+      "prompt": "Hello, how are you?",
+      "ground_truth": {
+        "scenario": "greeting"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["HandleOtherTalk"],
+      "tool_must_not_be_called": ["structured_rag", "update_return", "canonical_rag"]
+    },
+    {
+      "id": "out_of_scope_002",
+      "name": "Weather question - polite redirect",
+      "category": "out_of_scope",
+      "user_id": "4165",
+      "prompt": "What's the weather like today?",
+      "ground_truth": {
+        "scenario": "off_topic_question"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": ["sunny", "rain", "degrees", "temperature", "celsius", "fahrenheit"],
+      "tool_must_be_called": ["HandleOtherTalk"],
+      "tool_must_not_be_called": ["structured_rag", "update_return", "canonical_rag"]
+    },
+    {
+      "id": "out_of_scope_003",
+      "name": "Competitor product - scope limitation",
+      "category": "out_of_scope",
+      "user_id": "4165",
+      "prompt": "Can you tell me about the latest iPhone?",
+      "ground_truth": {
+        "scenario": "competitor_product"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": ["iPhone 15", "iPhone 16", "Apple", "iOS", "A17"],
+      "tool_must_be_called": ["HandleOtherTalk"],
+      "tool_must_not_be_called": ["structured_rag", "update_return", "canonical_rag"]
+    },
+    {
+      "id": "out_of_scope_004",
+      "name": "General knowledge question - redirect",
+      "category": "out_of_scope",
+      "user_id": "4165",
+      "prompt": "What is the capital of France?",
+      "ground_truth": {
+        "scenario": "general_knowledge"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["HandleOtherTalk"],
+      "tool_must_not_be_called": ["structured_rag", "update_return", "canonical_rag"]
+    },
+    {
+      "id": "out_of_scope_005",
+      "name": "Creative request - polite decline",
+      "category": "out_of_scope",
+      "user_id": "4165",
+      "prompt": "Write me a poem about the ocean",
+      "ground_truth": {
+        "scenario": "creative_request"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["HandleOtherTalk"],
+      "tool_must_not_be_called": ["structured_rag", "update_return", "canonical_rag"]
+    }
+  ],
+  "metadata": {
+    "total_tasks": 5,
+    "scenarios_covered": ["greeting", "off_topic_question", "competitor_product", "general_knowledge", "creative_request"],
+    "users_covered": ["4165"]
+  }
+}

@@ -16,7 +16,7 @@
       },
       "response_must_contain": ["Approved"],
       "response_must_not_contain": [],
-      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_be_called": ["ToReturnProcessing", "get_recent_return_details"],
       "tool_must_not_be_called": ["update_return"]
     },
     {
@@ -34,7 +34,7 @@
       },
       "response_must_contain": ["Pending"],
       "response_must_not_contain": [],
-      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_be_called": ["ToReturnProcessing", "get_recent_return_details"],
       "tool_must_not_be_called": ["update_return"]
     },
     {
@@ -53,7 +53,7 @@
       },
       "response_must_contain": ["Rejected"],
       "response_must_not_contain": [],
-      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_be_called": ["ToReturnProcessing", "get_recent_return_details"],
       "tool_must_not_be_called": ["update_return"]
     },
     {
@@ -71,7 +71,7 @@
       },
       "response_must_contain": ["Requested"],
       "response_must_not_contain": [],
-      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_be_called": ["ToReturnProcessing", "get_recent_return_details"],
       "tool_must_not_be_called": ["update_return"]
     },
     {
@@ -89,7 +89,7 @@
       },
       "response_must_contain": [],
       "response_must_not_contain": ["Approved", "Rejected", "Pending Approval"],
-      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_be_called": ["ToReturnProcessing", "get_recent_return_details"],
       "tool_must_not_be_called": ["update_return"]
     },
     {
@@ -107,7 +107,7 @@
       },
       "response_must_contain": ["Approved"],
       "response_must_not_contain": [],
-      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_be_called": ["ToReturnProcessing", "get_recent_return_details"],
       "tool_must_not_be_called": ["update_return"]
     },
     {
@@ -126,7 +126,7 @@
       },
       "response_must_contain": ["warranty"],
       "response_must_not_contain": [],
-      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_be_called": ["ToReturnProcessing", "get_recent_return_details"],
       "tool_must_not_be_called": ["update_return"]
     },
     {
@@ -144,7 +144,7 @@
       },
       "response_must_contain": ["Pending"],
       "response_must_not_contain": [],
-      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_be_called": ["ToReturnProcessing", "get_recent_return_details"],
       "tool_must_not_be_called": ["update_return"]
     },
     {
@@ -163,7 +163,7 @@
       },
       "response_must_contain": ["warranty"],
       "response_must_not_contain": [],
-      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_be_called": ["ToReturnProcessing", "get_recent_return_details"],
       "tool_must_not_be_called": ["update_return"]
     },
     {
@@ -181,7 +181,7 @@
       },
       "response_must_contain": ["Approved"],
       "response_must_not_contain": [],
-      "tool_must_be_called": ["get_recent_return_details"],
+      "tool_must_be_called": ["ToReturnProcessing", "get_recent_return_details"],
       "tool_must_not_be_called": ["update_return"]
     }
   ],

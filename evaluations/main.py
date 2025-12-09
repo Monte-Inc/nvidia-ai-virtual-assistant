@@ -101,7 +101,20 @@ if "APP_CHECKPOINTER_NAME" not in os.environ:
 if "APP_DATABASE_URL" not in os.environ:
     os.environ["APP_DATABASE_URL"] = "localhost:5432"
 
+# Point to localhost for retriever services (instead of Docker hostnames)
+if "CANONICAL_RAG_URL" not in os.environ:
+    os.environ["CANONICAL_RAG_URL"] = "http://localhost:8086"
+if "STRUCTURED_RAG_URI" not in os.environ:
+    os.environ["STRUCTURED_RAG_URI"] = "http://localhost:8087"
+
 # Database credentials for the agent's tools (matches docker-compose defaults)
+# The update_return tool uses POSTGRES_USER/POSTGRES_PASSWORD directly
+if "POSTGRES_USER" not in os.environ:
+    os.environ["POSTGRES_USER"] = "postgres"
+if "POSTGRES_PASSWORD" not in os.environ:
+    os.environ["POSTGRES_PASSWORD"] = "password"
+
+# Also set the readonly variants for other tools that may need them
 if "POSTGRES_USER_READONLY" not in os.environ:
     os.environ["POSTGRES_USER_READONLY"] = os.environ.get("POSTGRES_USER", "postgres")
 if "POSTGRES_PASSWORD_READONLY" not in os.environ:

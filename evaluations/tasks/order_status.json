@@ -16,7 +16,7 @@
       },
       "response_must_contain": ["Delivered"],
       "response_must_not_contain": [],
-      "tool_must_be_called": ["structured_rag"],
+      "tool_must_be_called": ["ToOrderStatusAssistant", "structured_rag"],
       "tool_must_not_be_called": ["update_return"]
     },
     {
@@ -34,7 +34,7 @@
       },
       "response_must_contain": ["Canceled", "payment"],
       "response_must_not_contain": [],
-      "tool_must_be_called": ["structured_rag"],
+      "tool_must_be_called": ["ToOrderStatusAssistant", "structured_rag"],
       "tool_must_not_be_called": ["update_return"]
     },
     {
@@ -52,7 +52,7 @@
       },
       "response_must_contain": ["shipping"],
       "response_must_not_contain": [],
-      "tool_must_be_called": ["structured_rag"],
+      "tool_must_be_called": ["ToOrderStatusAssistant", "structured_rag"],
       "tool_must_not_be_called": ["update_return"]
     },
     {
@@ -68,7 +68,7 @@
       },
       "response_must_contain": [],
       "response_must_not_contain": ["Delivered", "Shipped", "In Transit"],
-      "tool_must_be_called": ["structured_rag"],
+      "tool_must_be_called": ["ToOrderStatusAssistant", "structured_rag"],
       "tool_must_not_be_called": ["update_return"]
     },
     {
@@ -85,7 +85,7 @@
       },
       "response_must_contain": ["Shipped"],
       "response_must_not_contain": [],
-      "tool_must_be_called": ["structured_rag"],
+      "tool_must_be_called": ["ToOrderStatusAssistant", "structured_rag"],
       "tool_must_not_be_called": ["update_return"]
     },
     {
@@ -103,7 +103,7 @@
       },
       "response_must_contain": ["Processing"],
       "response_must_not_contain": [],
-      "tool_must_be_called": ["structured_rag"],
+      "tool_must_be_called": ["ToOrderStatusAssistant", "structured_rag"],
       "tool_must_not_be_called": ["update_return"]
     },
     {
@@ -121,7 +121,7 @@
       },
       "response_must_contain": ["payment"],
       "response_must_not_contain": [],
-      "tool_must_be_called": ["structured_rag"],
+      "tool_must_be_called": ["ToOrderStatusAssistant", "structured_rag"],
       "tool_must_not_be_called": ["update_return"]
     },
     {
@@ -138,7 +138,7 @@
       },
       "response_must_contain": ["Pending"],
       "response_must_not_contain": [],
-      "tool_must_be_called": ["structured_rag"],
+      "tool_must_be_called": ["ToOrderStatusAssistant", "structured_rag"],
       "tool_must_not_be_called": ["update_return"]
     },
     {
@@ -156,7 +156,7 @@
       },
       "response_must_contain": ["shipping"],
       "response_must_not_contain": [],
-      "tool_must_be_called": ["structured_rag"],
+      "tool_must_be_called": ["ToOrderStatusAssistant", "structured_rag"],
       "tool_must_not_be_called": ["update_return"]
     },
     {
@@ -173,7 +173,7 @@
       },
       "response_must_contain": ["Out for Delivery"],
       "response_must_not_contain": [],
-      "tool_must_be_called": ["structured_rag"],
+      "tool_must_be_called": ["ToOrderStatusAssistant", "structured_rag"],
       "tool_must_not_be_called": ["update_return"]
     }
   ],

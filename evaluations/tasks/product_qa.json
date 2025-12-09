@@ -1,0 +1,455 @@
+{
+  "description": "Tasks for evaluating product Q&A functionality using unstructured retrieval",
+  "tasks": [
+    {
+      "id": "product_qa_001",
+      "name": "GPU specs inquiry - RTX 4090 CUDA cores",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "How many CUDA cores does the RTX 4090 have?",
+      "ground_truth": {
+        "product_name": "NVIDIA® GEFORCE RTX™ 4090",
+        "cuda_cores": 16384,
+        "subcategory": "Geforce",
+        "scenario": "technical_specs"
+      },
+      "response_must_contain": ["16384"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_002",
+      "name": "GPU price inquiry - RTX 4070 SUPER",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "What's the price of the RTX 4070 SUPER?",
+      "ground_truth": {
+        "product_name": "NVIDIA® GEFORCE RTX™ 4070 SUPER",
+        "price": 799.0,
+        "subcategory": "Geforce",
+        "scenario": "price_inquiry"
+      },
+      "response_must_contain": ["799"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_003",
+      "name": "Shield features inquiry - Shield TV Pro processor",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "What processor does the Shield TV Pro use?",
+      "ground_truth": {
+        "product_name": "NVIDIA® SHIELD™ TV PRO 2019",
+        "processor": "Tegra X1+",
+        "subcategory": "Shield",
+        "scenario": "technical_specs"
+      },
+      "response_must_contain": ["Tegra"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_004",
+      "name": "Jetson description inquiry - Jetson Nano use cases",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "What is the Jetson Nano Developer Kit used for?",
+      "ground_truth": {
+        "product_name": "JETSON NANO DEVELOPER KIT",
+        "use_cases": ["image classification", "object detection", "segmentation", "speech processing"],
+        "subcategory": "Jetson",
+        "scenario": "product_description"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_005",
+      "name": "Jetson specs inquiry - Jetson Orin Nano performance",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "How much faster is the Jetson Orin Nano compared to the original Jetson Nano?",
+      "ground_truth": {
+        "product_name": "NVIDIA JETSON ORIN NANO DEVELOPER KIT",
+        "performance": "80X the performance of Jetson Nano",
+        "ai_performance": "40 TOPS",
+        "subcategory": "Jetson",
+        "scenario": "technical_specs"
+      },
+      "response_must_contain": ["80"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_006",
+      "name": "Product price inquiry - Stanley Tumbler",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "How much does the Stanley Quencher Tumbler cost?",
+      "ground_truth": {
+        "product_name": "40 OZ. STANLEY QUENCHER TUMBLER",
+        "price": 50.0,
+        "category": "Drinkware",
+        "scenario": "price_inquiry"
+      },
+      "response_must_contain": ["50"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_007",
+      "name": "Product features inquiry - Timbuk2 Backpack",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "What size laptop does the Timbuk2 Parkside Backpack fit?",
+      "ground_truth": {
+        "product_name": "TIMBUK2 PARKSIDE BACKPACK 2.0",
+        "laptop_size": "15 inch",
+        "price": 99.0,
+        "category": "Bags",
+        "scenario": "product_features"
+      },
+      "response_must_contain": ["15"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_008",
+      "name": "Product contents inquiry - Computer Care Kit",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "What's included in the Computer Care Kit?",
+      "ground_truth": {
+        "product_name": "COMPUTER CARE KIT",
+        "contents": ["Webcam Cover", "Screen cleaner", "sticker set"],
+        "price": 12.0,
+        "category": "Office",
+        "scenario": "product_contents"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_009",
+      "name": "Product price inquiry - Golf Balls",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "How much are the Titleist golf balls?",
+      "ground_truth": {
+        "product_name": "TITLEIST® PRO V1® HALF DOZEN GOLF BALLS",
+        "price": 45.0,
+        "category": "Lifestyle",
+        "scenario": "price_inquiry"
+      },
+      "response_must_contain": ["45"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_010",
+      "name": "Product features inquiry - Trekker Jacket",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "Is the North Face Trekker Jacket water resistant?",
+      "ground_truth": {
+        "product_name": "NORTH FACE MEN'S TREKKER JACKET",
+        "feature": "durable water-repellent (DWR) finish",
+        "price": 229.0,
+        "category": "Apparel",
+        "scenario": "product_features"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_011",
+      "name": "GPU power requirement - RTX 4090",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "What power supply wattage do I need for the RTX 4090?",
+      "ground_truth": {
+        "product_name": "NVIDIA® GEFORCE RTX™ 4090",
+        "power_supply": "850W",
+        "subcategory": "Geforce",
+        "scenario": "installation_requirements"
+      },
+      "response_must_contain": ["850"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_012",
+      "name": "GPU dimensions - RTX 4080",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "What are the dimensions of the RTX 4080 graphics card?",
+      "ground_truth": {
+        "product_name": "NVIDIA® GEFORCE RTX™ 4080",
+        "dimensions": "304 x 137 x 61 mm",
+        "subcategory": "Geforce",
+        "scenario": "technical_specs"
+      },
+      "response_must_contain": ["304"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_013",
+      "name": "GPU PCIe cables - RTX 4070",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "How many PCIe 8-pin power cables does the RTX 4070 require?",
+      "ground_truth": {
+        "product_name": "NVIDIA® GEFORCE RTX™ 4070",
+        "pcie_cables": 2,
+        "subcategory": "Geforce",
+        "scenario": "installation_requirements"
+      },
+      "response_must_contain": ["2"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_014",
+      "name": "GPU slot covers - RTX 4060 Ti",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "How many PCI slot covers do I need to remove to install the RTX 4060 Ti?",
+      "ground_truth": {
+        "product_name": "NVIDIA® GEFORCE RTX™ 4060 Ti",
+        "slot_covers": 2,
+        "subcategory": "Geforce",
+        "scenario": "installation_requirements"
+      },
+      "response_must_contain": ["2"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_015",
+      "name": "GPU power requirement - RTX 4070 SUPER",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "What's the minimum power supply wattage for the RTX 4070 SUPER?",
+      "ground_truth": {
+        "product_name": "NVIDIA® GEFORCE RTX™ 4070 SUPER",
+        "power_supply": "650W",
+        "subcategory": "Geforce",
+        "scenario": "installation_requirements"
+      },
+      "response_must_contain": ["650"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_016",
+      "name": "GPU display connectors - RTX 4080 SUPER",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "What display outputs does the RTX 4080 SUPER have?",
+      "ground_truth": {
+        "product_name": "NVIDIA® GEFORCE RTX™ 4080 SUPER",
+        "display_outputs": "3 DisplayPort and 1 HDMI",
+        "subcategory": "Geforce",
+        "scenario": "technical_specs"
+      },
+      "response_must_contain": ["DisplayPort", "HDMI"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_017",
+      "name": "GPU power requirement - RTX 4060 Ti",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "What size power supply do I need for the GeForce RTX 4060 Ti?",
+      "ground_truth": {
+        "product_name": "NVIDIA® GEFORCE RTX™ 4060 Ti",
+        "power_supply": "550W",
+        "subcategory": "Geforce",
+        "scenario": "installation_requirements"
+      },
+      "response_must_contain": ["550"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_018",
+      "name": "GPU PCIe cables - RTX 4090",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "How many 8-pin power connectors do I need for the RTX 4090?",
+      "ground_truth": {
+        "product_name": "NVIDIA® GEFORCE RTX™ 4090",
+        "pcie_cables": 3,
+        "subcategory": "Geforce",
+        "scenario": "installation_requirements"
+      },
+      "response_must_contain": ["3"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_019",
+      "name": "GPU dimensions - RTX 4070 SUPER",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "What is the size of the RTX 4070 SUPER in millimeters?",
+      "ground_truth": {
+        "product_name": "NVIDIA® GEFORCE RTX™ 4070 SUPER",
+        "dimensions": "244 x 112 x 41 mm",
+        "subcategory": "Geforce",
+        "scenario": "technical_specs"
+      },
+      "response_must_contain": ["244"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_020",
+      "name": "GPU power requirement - RTX 4080",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "What wattage PSU is recommended for the RTX 4080?",
+      "ground_truth": {
+        "product_name": "NVIDIA® GEFORCE RTX™ 4080",
+        "power_supply": "750W",
+        "subcategory": "Geforce",
+        "scenario": "installation_requirements"
+      },
+      "response_must_contain": ["750"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_021",
+      "name": "FAQ - Physical retail store",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "Is there a physical retail store?",
+      "ground_truth": {
+        "source": "FAQ",
+        "location": "NVIDIA corporate headquarters in Santa Clara, CA",
+        "building": "Endeavor building",
+        "hours": "Monday-Thursday, 10am-4pm PST",
+        "scenario": "store_info"
+      },
+      "response_must_contain": ["Santa Clara"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_022",
+      "name": "FAQ - Purchase electronics",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "Can I purchase electronics online or in-store?",
+      "ground_truth": {
+        "source": "FAQ",
+        "answer": "Select NVIDIA electronics can be purchased online and in-store with points",
+        "discount": "10% discount off retail price",
+        "limit": "one unit per sku over a lifetime",
+        "scenario": "purchasing_policy"
+      },
+      "response_must_contain": ["10"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_023",
+      "name": "FAQ - US return process",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "How do I make a return in the U.S.?",
+      "ground_truth": {
+        "source": "FAQ",
+        "return_window": "30 days from the day the order was placed",
+        "processing_time": "10 business days",
+        "scenario": "return_policy"
+      },
+      "response_must_contain": ["30"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_024",
+      "name": "FAQ - GPU warranty service",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "Do GPUs have warranty service?",
+      "ground_truth": {
+        "source": "FAQ",
+        "warranty": "manufacturer's warranty for three years from date of purchase",
+        "scenario": "warranty_policy"
+      },
+      "response_must_contain": ["three", "3"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    },
+    {
+      "id": "product_qa_025",
+      "name": "FAQ - Free weekly courier",
+      "category": "product_qa",
+      "user_id": "4165",
+      "prompt": "What day is the free weekly courier?",
+      "ground_truth": {
+        "source": "FAQ",
+        "delivery_day": "Wednesday",
+        "order_deadline": "Tuesday before Noon PST",
+        "scenario": "shipping_info"
+      },
+      "response_must_contain": ["Wednesday"],
+      "response_must_not_contain": [],
+      "tool_must_be_called": ["ToProductQAAssistant"],
+      "tool_must_not_be_called": ["update_return"]
+    }
+  ],
+  "metadata": {
+    "total_tasks": 25,
+    "scenarios_covered": ["price_inquiry", "technical_specs", "product_description", "product_features", "product_contents", "installation_requirements", "warranty_policy", "store_info", "purchasing_policy", "return_policy", "shipping_info"],
+    "categories_covered": {
+      "electronics": {
+        "geforce": 12,
+        "shield": 1,
+        "jetson": 2
+      },
+      "other": {
+        "drinkware": 1,
+        "bags": 1,
+        "office": 1,
+        "lifestyle": 1,
+        "apparel": 1
+      },
+      "faq": 5
+    },
+    "users_covered": ["4165"]
+  }
+}

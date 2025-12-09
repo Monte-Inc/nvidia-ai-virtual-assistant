@@ -12,7 +12,7 @@ This document outlines an **end-to-end evaluation framework** for the NVIDIA AI 
 
 **Key Principle**: We evaluate whether the agent *accomplished the user's goal correctly*, not whether it took a specific internal path.
 
-**Current Status**: Phase 1 (Core Infrastructure) is complete. Phase 2 (Task Generation) is partially complete with order_status tasks implemented.
+**Current Status**: Phase 1 (Core Infrastructure) is complete. Phase 2 (Task Generation) is mostly complete with order_status, return_status, and return_init tasks implemented (30 tasks total).
 
 ---
 
@@ -99,7 +99,7 @@ We categorize by **what the user is trying to accomplish**, not internal routing
 
 ---
 
-### Category 2: Return Status Lookup 🔲 NOT YET IMPLEMENTED
+### Category 2: Return Status Lookup ✅ IMPLEMENTED
 
 **User Goal**: Check the status of an existing return (NOT initiate a new one).
 
@@ -112,26 +112,32 @@ We categorize by **what the user is trying to accomplish**, not internal routing
 
 **Verification** (must be explicitly set per task):
 - `response_must_contain`: The return status value
+- `tool_must_be_called`: `["get_recent_return_details"]`
 - `tool_must_not_be_called`: `["update_return"]` — **Critical** to distinguish from return initiation
+
+**Status**: 10 tasks implemented in `tasks/return_status.json`
 
 ---
 
-### Category 3: Return Initiation 🔲 NOT YET IMPLEMENTED
+### Category 3: Return Initiation ✅ IMPLEMENTED
 
 **User Goal**: Start a return for a product.
 
 | Scenario | Example Query | Success Criteria |
 |----------|---------------|------------------|
-| Valid return (delivered, in window) | "I want to return my Jetson Nano" | DB updated: `return_status = 'Requested'` |
+| Valid return (delivered, in window) | "I want to return my RTX 4080" | DB updated: `return_status = 'Requested'` |
 | Already has return in progress | "I want to return my RTX 4090" | Response indicates return already exists, no DB change |
-| Not yet delivered | "Return my tee shirt" | Response explains can't return yet, no DB change |
-| Outside return window | "Return my [old order]" | Response explains window expired, no DB change |
+| Not yet delivered | "I want to return my Shield TV" | Response explains can't return yet, no DB change |
+| Cancelled order | "I'd like to return my RTX 4090" | Response explains order was cancelled, no DB change |
 
 **Verification** (must be explicitly set per task):
 - `tool_must_be_called`: `["update_return"]` for valid returns
+- `tool_must_not_be_called`: `["update_return"]` for invalid returns
 - `expected_db_state`: `{"return_status": "Requested"}` to verify DB was updated
 
-**Note**: Agent uses `interrupt_before` for `update_return`. The `AgentClient` supports `auto_approve_interrupts=True` to handle this in eval mode.
+**Note**: Agent uses `interrupt_before` for `update_return`. The `AgentClient` supports `auto_approve_interrupts=True` to handle this in eval mode. Requires `RETURN_WINDOW_CURRENT_DATE=2024-10-23` in `.env` for return window validation.
+
+**Status**: 10 tasks implemented in `tasks/return_init.json`
 
 ---
 
@@ -254,8 +260,8 @@ This allows:
 | Category | Status | File | Count |
 |----------|--------|------|-------|
 | Order Status | ✅ Complete | `tasks/order_status.json` | 10 tasks |
-| Return Status | 🔲 Not started | - | - |
-| Return Initiation | 🔲 Not started | - | - |
+| Return Status | ✅ Complete | `tasks/return_status.json` | 10 tasks |
+| Return Initiation | ✅ Complete | `tasks/return_init.json` | 10 tasks |
 | Product QA | 🔲 Not started | - | - |
 | Out-of-Scope | 🔲 Not started | - | - |
 
@@ -289,13 +295,13 @@ This allows:
 - [x] Report generation (`RunSummary.format_report()`)
 - [x] Unit tests for all core modules
 
-### Phase 2: Task Generation 🔶 IN PROGRESS
+### Phase 2: Task Generation ✅ MOSTLY COMPLETE
 - [x] Order Status tasks (10 tasks covering various scenarios)
-- [ ] Return Status tasks
-- [ ] Return Initiation tasks
+- [x] Return Status tasks (10 tasks covering approved, pending, rejected, no return)
+- [x] Return Initiation tasks (10 tasks covering valid returns, already has return, not delivered, cancelled)
 - [ ] Product QA tasks
 - [ ] Out-of-Scope tasks
-- Target: 30-40 tasks across categories
+- Current: 30 tasks across 3 categories (Target: 40-50 tasks)
 
 ### Phase 3: LLM Judge 🔲 NOT STARTED
 - [ ] Implement `llm_judge_rag_accuracy()` in verifiers
@@ -505,8 +511,9 @@ pytest evaluations/tests/ -v
 
 ## Next Steps
 
-1. **Create return_status tasks** - Query DB for users with existing returns, create task JSON
-2. **Create return_init tasks** - Query DB for users with delivered orders that can be returned
+1. ~~**Create return_status tasks**~~ ✅ Done - 10 tasks in `tasks/return_status.json`
+2. ~~**Create return_init tasks**~~ ✅ Done - 10 tasks in `tasks/return_init.json`
 3. **Create product_qa tasks** - Identify key product questions and expected answers
 4. **Create out_of_scope tasks** - Hand-write common off-topic queries
 5. **Run full evaluation** - Test against live agent, analyze results
+6. **Implement LLM judge** - For Product QA semantic accuracy verification

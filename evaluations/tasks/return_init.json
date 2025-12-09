@@ -1,0 +1,244 @@
+{
+  "description": "Tasks for evaluating return initiation functionality. Tests the agent's ability to correctly initiate returns when conditions are met, and properly decline when conditions are not met. Requires RETURN_WINDOW_CURRENT_DATE=2024-10-23 in .env",
+  "tasks": [
+    {
+      "id": "return_init_001",
+      "name": "Valid return initiation - RTX 4080",
+      "category": "return_init",
+      "user_id": "125",
+      "prompt": "I want to return my RTX 4080",
+      "ground_truth": {
+        "order_id": 88153,
+        "product_name": "NVIDIA® GEFORCE RTX™ 4080",
+        "order_status": "Delivered",
+        "order_date": "2024-10-10",
+        "return_status_before": null,
+        "scenario": "valid_return"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": ["expired", "not eligible", "cannot"],
+      "tool_must_be_called": ["ToReturnProcessing", "update_return"],
+      "tool_must_not_be_called": [],
+      "expected_db_state": {
+        "order_id": 88153,
+        "return_status": "Requested"
+      }
+    },
+    {
+      "id": "return_init_002",
+      "name": "Valid return initiation - RTX 4070 SUPER",
+      "category": "return_init",
+      "user_id": "9522",
+      "prompt": "I'd like to return my RTX 4070 SUPER please",
+      "ground_truth": {
+        "order_id": 50433,
+        "product_name": "NVIDIA® GEFORCE RTX™ 4070 SUPER",
+        "order_status": "Delivered",
+        "order_date": "2024-10-10",
+        "return_status_before": null,
+        "scenario": "valid_return"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": ["expired", "not eligible", "cannot"],
+      "tool_must_be_called": ["ToReturnProcessing", "update_return"],
+      "tool_must_not_be_called": [],
+      "expected_db_state": {
+        "order_id": 50433,
+        "return_status": "Requested"
+      }
+    },
+    {
+      "id": "return_init_003",
+      "name": "Valid return initiation - Shield TV Pro",
+      "category": "return_init",
+      "user_id": "9522",
+      "prompt": "I need to return my Shield TV Pro",
+      "ground_truth": {
+        "order_id": 3480,
+        "product_name": "NVIDIA® SHIELD™ TV PRO 2019",
+        "order_status": "Delivered",
+        "order_date": "2024-10-12",
+        "return_status_before": null,
+        "scenario": "valid_return"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": ["expired", "not eligible", "cannot"],
+      "tool_must_be_called": ["ToReturnProcessing", "update_return"],
+      "tool_must_not_be_called": [],
+      "expected_db_state": {
+        "order_id": 3480,
+        "return_status": "Requested"
+      }
+    },
+    {
+      "id": "return_init_004",
+      "name": "Valid return initiation - RTX 4090",
+      "category": "return_init",
+      "user_id": "6229",
+      "prompt": "I want to return my RTX 4090",
+      "ground_truth": {
+        "order_id": 94036,
+        "product_name": "NVIDIA® GEFORCE RTX™ 4090",
+        "order_status": "Delivered",
+        "order_date": "2024-10-15",
+        "return_status_before": null,
+        "scenario": "valid_return"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": ["expired", "not eligible", "cannot"],
+      "tool_must_be_called": ["ToReturnProcessing", "update_return"],
+      "tool_must_not_be_called": [],
+      "expected_db_state": {
+        "order_id": 94036,
+        "return_status": "Requested"
+      }
+    },
+    {
+      "id": "return_init_005",
+      "name": "Already has return - RTX 4090 with Requested status",
+      "category": "return_init",
+      "user_id": "4165",
+      "prompt": "I want to return my RTX 4090",
+      "ground_truth": {
+        "order_id": 4065,
+        "product_name": "NVIDIA® GEFORCE RTX™ 4090",
+        "order_status": "Return Requested",
+        "return_status_before": "Requested",
+        "scenario": "already_has_return"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": [],
+      "tool_must_be_called": [],
+      "tool_must_not_be_called": ["update_return"],
+      "expected_db_state": {}
+    },
+    {
+      "id": "return_init_006",
+      "name": "Already has return - RTX 4070 SUPER with Pending Approval",
+      "category": "return_init",
+      "user_id": "4165",
+      "prompt": "I want to start a return for my RTX 4070 SUPER",
+      "ground_truth": {
+        "order_id": 13955,
+        "product_name": "NVIDIA® GEFORCE RTX™ 4070 SUPER",
+        "order_status": "Return Requested",
+        "return_status_before": "Pending Approval",
+        "scenario": "already_has_return"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": [],
+      "tool_must_be_called": [],
+      "tool_must_not_be_called": ["update_return"],
+      "expected_db_state": {}
+    },
+    {
+      "id": "return_init_007",
+      "name": "Order not delivered - Shield TV is Shipped",
+      "category": "return_init",
+      "user_id": "5603",
+      "prompt": "I want to return my Shield TV",
+      "ground_truth": {
+        "order_id": 54706,
+        "product_name": "NVIDIA® SHIELD™ TV 2019",
+        "order_status": "Shipped",
+        "scenario": "not_delivered"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": [],
+      "tool_must_be_called": [],
+      "tool_must_not_be_called": ["update_return"],
+      "expected_db_state": {}
+    },
+    {
+      "id": "return_init_008",
+      "name": "Order not delivered - RTX 4080 is In Transit",
+      "category": "return_init",
+      "user_id": "7154",
+      "prompt": "Can I return my RTX 4080?",
+      "ground_truth": {
+        "order_id": 42084,
+        "product_name": "NVIDIA® GEFORCE RTX™ 4080",
+        "order_status": "In Transit",
+        "scenario": "not_delivered"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": [],
+      "tool_must_be_called": [],
+      "tool_must_not_be_called": ["update_return"],
+      "expected_db_state": {}
+    },
+    {
+      "id": "return_init_009",
+      "name": "Cancelled order - RTX 4090 was cancelled",
+      "category": "return_init",
+      "user_id": "5603",
+      "prompt": "I'd like to return my RTX 4090",
+      "ground_truth": {
+        "order_id": 1643,
+        "product_name": "NVIDIA® GEFORCE RTX™ 4090",
+        "order_status": "Cancelled",
+        "scenario": "cancelled_order"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": [],
+      "tool_must_be_called": [],
+      "tool_must_not_be_called": ["update_return"],
+      "expected_db_state": {}
+    },
+    {
+      "id": "return_init_010",
+      "name": "Valid return initiation - Jetson Orin Nano",
+      "category": "return_init",
+      "user_id": "7154",
+      "prompt": "I want to return my Jetson Orin Nano",
+      "ground_truth": {
+        "order_id": 89884,
+        "product_name": "NVIDIA JETSON ORIN NANO DEVELOPER KIT",
+        "order_status": "Delivered",
+        "order_date": "2024-10-20",
+        "return_status_before": null,
+        "scenario": "valid_return"
+      },
+      "response_must_contain": [],
+      "response_must_not_contain": ["expired", "not eligible", "cannot"],
+      "tool_must_be_called": ["ToReturnProcessing", "update_return"],
+      "tool_must_not_be_called": [],
+      "expected_db_state": {
+        "order_id": 89884,
+        "return_status": "Requested"
+      }
+    }
+  ],
+  "metadata": {
+    "total_tasks": 10,
+    "scenarios_covered": [
+      "valid_return",
+      "already_has_return",
+      "not_delivered",
+      "cancelled_order"
+    ],
+    "scenario_counts": {
+      "valid_return": 5,
+      "already_has_return": 2,
+      "not_delivered": 2,
+      "cancelled_order": 1
+    },
+    "users_covered": ["125", "4165", "5603", "6229", "7154", "9522"],
+    "critical_verification": {
+      "valid_return": {
+        "tool_must_be_called": ["ToReturnProcessing", "update_return"],
+        "expected_db_state": "return_status should be 'Requested' - verifies actual DB update"
+      },
+      "invalid_return": {
+        "tool_must_not_be_called": ["update_return"],
+        "expected_db_state": "empty - no changes to database expected"
+      }
+    },
+    "notes": [
+      "Requires RETURN_WINDOW_CURRENT_DATE=2024-10-23 in .env for valid return scenarios.",
+      "Valid return orders have dates between Oct 8-23 (within 15-day window from Oct 23).",
+      "The agent uses interrupt_before for update_return - AgentClient auto-approves interrupts.",
+      "Database state verification confirms actual DB changes, not just tool calls."
+    ]
+  }
+}
