@@ -142,10 +142,6 @@ def return_window_validation(order_date: str) -> str:
 @lru_cache
 def update_return(user_id: str, current_product: str, order_id: str) -> str:
     """Use this to update return status in the database."""
-    # Decode unicode escape sequences if present (e.g., \u00ae -> ®)
-    # This handles cases where the LLM returns escaped unicode
-    if current_product and '\\u' in current_product:
-        current_product = current_product.encode('utf-8').decode('unicode_escape')
 
     # Query to retrieve the order details
     SELECT_QUERY = f"""
